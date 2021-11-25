@@ -87,7 +87,7 @@ public class User {
         strUser.append(age + " years old - " + this.gender);
         String alive = this.isAlive ? alive = ", Alive" : ", Dead";
         strUser.append(alive + ",");
-        strUser.append(profilePicture.toString());        
+//        strUser.append(profilePicture.toString());        
         strUser.append(System.lineSeparator());
         return strUser.toString();
     }

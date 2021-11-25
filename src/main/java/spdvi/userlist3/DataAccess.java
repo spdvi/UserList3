@@ -1,9 +1,15 @@
 package spdvi.userlist3;
 
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Properties;
 
 public class DataAccess {
@@ -52,5 +58,36 @@ public class DataAccess {
         }
         
         return 0;
+    }
+    
+    public ArrayList<User> getUsers() {
+        ArrayList<User> users = new ArrayList<>();
+        
+        try (Connection connection = getConnection()) {
+            PreparedStatement selectStatement = connection.prepareStatement(
+                    "SELECT * FROM [User]"
+            );
+            ResultSet resultSet = selectStatement.executeQuery();
+            while(resultSet.next()) {
+                User user = new User(
+                        resultSet.getInt("id"),
+                        resultSet.getString("firstName"),
+                        resultSet.getString("lastName"),
+//                        LocalDateTime.parse(resultSet.getString("birthDate")).toLocalDate(),
+                        LocalDate.parse(resultSet.getString("birthDate")),
+                        resultSet.getString("gender"),
+                        resultSet.getBoolean("isAlive"),
+                        //resultSet.getString("profilePicture")
+                        null
+                );
+                
+                users.add(user);
+            }
+        }
+        catch (SQLException sqle) {
+            sqle.printStackTrace();
+        }
+        
+        return users;
     }
 }
