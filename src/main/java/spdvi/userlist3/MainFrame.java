@@ -16,7 +16,7 @@ import javax.swing.JList;
 public class MainFrame extends javax.swing.JFrame {
 
     JList<User> lstUsers = new JList<>();
-    
+
     /**
      * Creates new form MainFrame
      */
@@ -229,17 +229,22 @@ public class MainFrame extends javax.swing.JFrame {
         );
         DataAccess da = new DataAccess();
         int newUserId = da.insertUser(newUser);
-        txtId.setText(String.valueOf(newUserId));
+        if (newUserId > 0) {
+            txtId.setText(String.valueOf(newUserId));
+            newUser.setId(newUserId);
+        } else
+            //throw new Exception("Error inserting user");
+            ;
     }//GEN-LAST:event_btnInsertActionPerformed
 
     private void btnReadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReadActionPerformed
         DataAccess da = new DataAccess();
         DefaultListModel<User> defaultListModel = new DefaultListModel<>();
 
-        for (User u: da.getUsers()) {
+        for (User u : da.getUsers()) {
             defaultListModel.addElement(u);
         }
-        
+
         lstUsers.setModel(defaultListModel);
     }//GEN-LAST:event_btnReadActionPerformed
 
