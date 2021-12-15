@@ -14,6 +14,8 @@ import java.util.Properties;
 
 public class DataAccess {
     
+	// Come comments
+	
     private Connection getConnection() {
         Connection connection = null;
         Properties properties = new Properties();
