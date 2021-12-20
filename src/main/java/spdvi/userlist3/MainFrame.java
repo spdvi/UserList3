@@ -4,8 +4,11 @@
  */
 package spdvi.userlist3;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDate;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 
@@ -227,6 +230,14 @@ public class MainFrame extends javax.swing.JFrame {
                 chkIsAlive.isSelected(),
                 null
         );
+        
+        try {
+            URL imageUrl = new URL(txtProfilePicture.getText());
+            newUser.setProfilePicture(imageUrl);
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
         DataAccess da = new DataAccess();
         int newUserId = da.insertUser(newUser);
         if (newUserId > 0) {

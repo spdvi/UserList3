@@ -1,5 +1,6 @@
 package spdvi.userlist3;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -11,11 +12,12 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DataAccess {
-    
-	// Come comments
-	
+
+    // Come comments
     private Connection getConnection() {
         Connection connection = null;
         Properties properties = new Properties();
@@ -27,23 +29,28 @@ public class DataAccess {
         }
         return connection;
     }
-    
+
     public int insertUser(User user) {
-        
+
         try (Connection connection = getConnection();) {
+            
             PreparedStatement insertStatement = connection.prepareStatement(
                     "INSERT INTO dbo.[User] (firstName, lastName, birthDate, gender, isAlive, profilePicture) "
-                            + "VALUES (?,?,?,?,?,?)");
+                    + "VALUES (?,?,?,?,?,?)");
             insertStatement.setString(1, user.getFirstName());
             insertStatement.setString(2, user.getLastName());
             insertStatement.setString(3, user.getBirthDate().toString());
             insertStatement.setString(4, user.getGender());
             insertStatement.setBoolean(5, user.isIsAlive());
-            //insertStatement.setString(6, user.getProfilePicture().toString());
-            insertStatement.setString(6, null);
-            
+            if (user.getProfilePicture() != null) {
+                insertStatement.setString(6, user.getProfilePicture().toString());            
+            }
+            else 
+                insertStatement.setNull(6, java.sql.Types.NVARCHAR);
+
+
             int result = insertStatement.executeUpdate();
-            
+
             if (result > 0) {
                 PreparedStatement selectStatement = connection.prepareStatement(
                         "SELECT MAX(id) AS newId FROM dbo.[User]");
@@ -58,38 +65,48 @@ public class DataAccess {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
         return 0;
     }
-    
+
     public ArrayList<User> getUsers() {
         ArrayList<User> users = new ArrayList<>();
-        
+
         try (Connection connection = getConnection()) {
             PreparedStatement selectStatement = connection.prepareStatement(
                     "SELECT * FROM [User]"
             );
             ResultSet resultSet = selectStatement.executeQuery();
-            while(resultSet.next()) {
+            while (resultSet.next()) {
                 User user = new User(
                         resultSet.getInt("id"),
                         resultSet.getString("firstName"),
                         resultSet.getString("lastName"),
-//                        LocalDateTime.parse(resultSet.getString("birthDate")).toLocalDate(),
+                        //                        LocalDateTime.parse(resultSet.getString("birthDate")).toLocalDate(),
                         LocalDate.parse(resultSet.getString("birthDate")),
                         resultSet.getString("gender"),
                         resultSet.getBoolean("isAlive"),
-                        //resultSet.getString("profilePicture")
+                        //new URL(resultSet.getString("profilePicture"))
                         null
                 );
-                
+
+                try {
+                    String imageUrlString = resultSet.getString("profilePicture");
+
+                    if (imageUrlString != null) {
+                        URL imageUrl = new URL(imageUrlString);
+                        user.setProfilePicture(imageUrl);
+                    }
+                } catch (MalformedURLException ex) {
+                    Logger.getLogger(DataAccess.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
                 users.add(user);
             }
-        }
-        catch (SQLException sqle) {
+        } catch (SQLException sqle) {
             sqle.printStackTrace();
         }
-        
+
         return users;
     }
 }
